@@ -45,6 +45,8 @@ model User {
   accounts      Account[]
   sessions      Session[]
   bookings      Booking[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 }
 
 model VerificationToken {
@@ -63,6 +65,8 @@ model Destination {
   image       String
   description String
   schedules   Schedule[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 model Train {
@@ -71,6 +75,8 @@ model Train {
   number      String   @unique
   capacity    Int
   schedules   Schedule[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 model Schedule {
@@ -84,6 +90,8 @@ model Schedule {
   arrivalTime   DateTime
   price         Float
   bookings      Booking[]
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
 }
 
 model Booking {

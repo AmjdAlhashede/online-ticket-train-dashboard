@@ -8,6 +8,7 @@ import {
     MapPin,
     CalendarDays,
     Users,
+    Ticket,
     Settings,
     LogOut
 } from 'lucide-react';
@@ -18,8 +19,7 @@ const MENU_ITEMS = [
     { icon: CalendarDays, label: 'Schedules', href: '/schedules' },
     { icon: MapPin, label: 'Destinations', href: '/destinations' },
     { icon: TrainFront, label: 'Trains', href: '/trains' },
-    { icon: Users, label: 'User Management', href: '/users' },
-    { icon: Settings, label: 'Settings', href: '/settings' },
+    { icon: Ticket, label: 'System Monitor', href: '/bookings' },
 ];
 
 export default function Sidebar() {
@@ -45,8 +45,8 @@ export default function Sidebar() {
                             key={item.href}
                             href={item.href}
                             className={`flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all font-medium ${isActive
-                                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/20'
-                                    : 'text-slate-400 hover:text-white hover:bg-slate-800'
+                                ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/20'
+                                : 'text-slate-400 hover:text-white hover:bg-slate-800'
                                 }`}
                         >
                             <item.icon size={20} />
