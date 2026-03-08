@@ -2,8 +2,9 @@ import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import prisma from "./lib/prisma";
 import bcrypt from "bcryptjs";
+import { NextAuthOptions } from "next-auth";
 
-export const { auth, signIn, signOut, handlers } = NextAuth({
+export const authOptions: NextAuthOptions = {
     pages: {
         signIn: '/login',
     },
@@ -52,4 +53,7 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
             return session;
         },
     },
-});
+};
+
+const handler = NextAuth(authOptions);
+export { handler as GET, handler as POST };
