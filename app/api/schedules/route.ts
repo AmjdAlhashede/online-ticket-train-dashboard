@@ -21,7 +21,20 @@ export async function GET(req: NextRequest) {
 
         const where: any = {};
         if (from && from !== 'all') {
-            where.origin = from;
+            // Check if 'from' is a CUID (Prisma ID) or a string name
+            if (from.startsWith('c')) {
+                const originStation = await prisma.destination.findUnique({
+                    where: { id: from },
+                    select: { city: true }
+                });
+                if (originStation) {
+                    where.origin = originStation.city;
+                } else {
+                    where.origin = from;
+                }
+            } else {
+                where.origin = from;
+            }
         }
         if (to && to !== 'all') {
             where.destinationId = to;
