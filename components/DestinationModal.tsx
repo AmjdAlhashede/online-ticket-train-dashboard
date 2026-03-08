@@ -41,14 +41,20 @@ export default function DestinationModal({ isOpen, onClose, onSave, initialData,
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
-        // Use default image if field is empty
-        const submissionData = {
-            ...formData,
-            image: formData.image.trim() || DEFAULT_IMAGE
-        };
-        await onSave(submissionData);
-        setLoading(false);
-        onClose();
+        try {
+            // Use default image if field is empty
+            const submissionData = {
+                ...formData,
+                image: formData.image.trim() || DEFAULT_IMAGE
+            };
+            await onSave(submissionData);
+            onClose();
+        } catch (error) {
+            console.error("Save Error:", error);
+            alert("Failed to save destination. The image might be too large or there's a connection issue.");
+        } finally {
+            setLoading(false);
+        }
     };
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
