@@ -16,7 +16,7 @@ interface ScheduleModalProps {
 export default function ScheduleModal({ isOpen, onClose, onSave, initialData, title }: ScheduleModalProps) {
     const [formData, setFormData] = useState({
         trainId: '',
-        origin: 'Riyadh Central', // Default origin as it's the main hub
+        origin: '', // Reset default to empty so it forces user to choose from their destinations
         destinationId: '',
         departureTime: '',
         arrivalTime: '',
@@ -102,17 +102,20 @@ export default function ScheduleModal({ isOpen, onClose, onSave, initialData, ti
                     </div>
 
                     <div>
-                        <label className="block text-sm font-bold text-slate-700 mb-1">Origin City</label>
+                        <label className="block text-sm font-bold text-slate-700 mb-1">Departure Station (Origin)</label>
                         <div className="relative">
                             <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                            <input
-                                type="text"
+                            <select
                                 required
-                                className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                                placeholder="Departure Point"
+                                className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all appearance-none bg-white"
                                 value={formData.origin}
                                 onChange={(e) => setFormData({ ...formData, origin: e.target.value })}
-                            />
+                            >
+                                <option value="">Choose origin...</option>
+                                {destinations.map(d => (
+                                    <option key={d.id} value={d.city}>{d.city} - {d.name}</option>
+                                ))}
+                            </select>
                         </div>
                     </div>
 
