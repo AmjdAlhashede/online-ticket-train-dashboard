@@ -12,6 +12,7 @@ import {
     Settings,
     LogOut
 } from 'lucide-react';
+import { signOut } from 'next-auth/react';
 
 const MENU_ITEMS = [
     { icon: LayoutDashboard, label: 'Dashboard', href: '/' },
@@ -57,7 +58,7 @@ export default function Sidebar() {
 
             <div className="p-4 mt-auto">
                 <button
-                    onClick={() => { window.location.href = '/login' }}
+                    onClick={() => signOut({ callbackUrl: '/login' })}
                     className="w-full flex items-center gap-3 px-4 py-4 rounded-xl text-red-400 hover:bg-red-500/10 transition-all font-bold"
                 >
                     <LogOut size={20} />

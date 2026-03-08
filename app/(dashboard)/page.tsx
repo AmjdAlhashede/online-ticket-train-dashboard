@@ -63,9 +63,6 @@ export default async function DashboardHome() {
                 <div className="p-8 bg-white rounded-3xl border border-slate-100 shadow-sm">
                     <div className="flex justify-between items-center mb-6">
                         <h3 className="text-xl font-bold text-slate-900">Recent Activity</h3>
-                        <button className="text-blue-600 text-sm font-bold flex items-center gap-1 hover:underline">
-                            View All <ArrowUpRight size={16} />
-                        </button>
                     </div>
                     <div className="space-y-6">
                         {recentBookings.length > 0 ? recentBookings.map((booking, i) => (
@@ -94,9 +91,6 @@ export default async function DashboardHome() {
                         <p className="text-blue-100 font-medium leading-relaxed opacity-90 max-w-sm">
                             Your train network currently has {trainsCount} trains serving {destinationsCount} destinations with {bookingsCount} total bookings.
                         </p>
-                        <button className="mt-8 px-6 py-3 bg-white text-blue-600 font-bold rounded-xl hover:bg-blue-50 transition-all shadow-lg">
-                            Analyze Routes
-                        </button>
                     </div>
                     <div className="absolute top-[-20%] right-[-10%] w-64 h-64 bg-white/10 rounded-full blur-3xl opacity-20"></div>
                 </div>
