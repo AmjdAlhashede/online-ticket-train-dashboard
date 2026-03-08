@@ -39,17 +39,22 @@ export default function MonitorPage() {
     }, [activeTab]);
 
     const filteredItems = items.filter(item => {
+        if (!item) return false;
         if (activeTab === 'bookings') {
-            return item.user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                item.schedule.origin.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                item.schedule.destination.city.toLowerCase().includes(searchTerm.toLowerCase());
+            const userName = (item.user?.name || item.user?.email || '').toLowerCase();
+            const origin = (item.schedule?.origin || '').toLowerCase();
+            const destCity = (item.schedule?.destination?.city || '').toLowerCase();
+            const s = searchTerm.toLowerCase();
+            return userName.includes(s) || origin.includes(s) || destCity.includes(s);
         } else {
-            return item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                item.email.toLowerCase().includes(searchTerm.toLowerCase());
+            const userName = (item.name || '').toLowerCase();
+            const userEmail = (item.email || '').toLowerCase();
+            const s = searchTerm.toLowerCase();
+            return userName.includes(s) || userEmail.includes(s);
         }
     });
 
-    const formatDate = (date: any) => new Date(date).toLocaleDateString();
+    const formatDate = (date: any) => date ? new Date(date).toLocaleDateString() : 'N/A';
 
     return (
         <div className="space-y-8">
@@ -61,14 +66,14 @@ export default function MonitorPage() {
 
                 <div className="bg-white p-1.5 rounded-2xl border border-slate-100 shadow-sm flex gap-2">
                     <button
-                        onClick={() => setActiveTab('bookings')}
+                        onClick={() => { setActiveTab('bookings'); setSearchTerm(''); }}
                         className={`flex items-center gap-2 px-6 py-2.5 rounded-xl font-bold transition-all ${activeTab === 'bookings' ? 'bg-blue-600 text-white shadow-lg shadow-blue-200' : 'text-slate-500 hover:bg-slate-50'}`}
                     >
                         <Ticket size={18} />
                         Bookings
                     </button>
                     <button
-                        onClick={() => setActiveTab('users')}
+                        onClick={() => { setActiveTab('users'); setSearchTerm(''); }}
                         className={`flex items-center gap-2 px-6 py-2.5 rounded-xl font-bold transition-all ${activeTab === 'users' ? 'bg-blue-600 text-white shadow-lg shadow-blue-200' : 'text-slate-500 hover:bg-slate-50'}`}
                     >
                         <Users size={18} />
@@ -103,8 +108,8 @@ export default function MonitorPage() {
                                         <TrendingUp size={24} />
                                     </div>
                                     <div>
-                                        <h4 className="font-black text-slate-900">{booking.user.name}</h4>
-                                        <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">{booking.user.email}</p>
+                                        <h4 className="font-black text-slate-900">{booking.user?.name || 'Unknown User'}</h4>
+                                        <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">{booking.user?.email || 'No Email'}</p>
                                     </div>
                                 </div>
 
@@ -112,9 +117,9 @@ export default function MonitorPage() {
                                     <div className="text-center md:text-left">
                                         <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Route</p>
                                         <div className="flex items-center gap-2 font-bold text-slate-700">
-                                            {booking.schedule.origin}
+                                            {booking.schedule?.origin || 'N/A'}
                                             <ArrowRight size={14} />
-                                            {booking.schedule.destination.city}
+                                            {booking.schedule?.destination?.city || 'N/A'}
                                         </div>
                                     </div>
                                     <div className="ml-auto text-right">
@@ -128,7 +133,7 @@ export default function MonitorPage() {
                                         <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Amount Paid</p>
                                         <div className="text-xl font-black text-slate-900 flex items-center gap-1">
                                             <span className="text-xs text-slate-400">SAR</span>
-                                            {booking.schedule.price}
+                                            {booking.schedule?.price || 0}
                                         </div>
                                     </div>
                                     <div className="px-4 py-2 bg-blue-50 text-blue-600 rounded-xl font-black text-xs uppercase tracking-widest shadow-sm">
@@ -140,18 +145,18 @@ export default function MonitorPage() {
                     ) : (
                         filteredItems.map((user) => (
                             <div key={user.id} className="bg-white rounded-3xl border border-slate-100 shadow-sm p-6 hover:shadow-xl transition-all group flex items-center gap-6">
-                                <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center shrink-0 font-black text-xl">
-                                    {user.name.charAt(0)}
+                                <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center shrink-0 font-black text-xl uppercase">
+                                    {(user.name || user.email || 'U').charAt(0)}
                                 </div>
                                 <div className="flex-1">
                                     <div className="flex items-center gap-2">
-                                        <h4 className="font-black text-slate-900 text-lg">{user.name}</h4>
+                                        <h4 className="font-black text-slate-900 text-lg">{user.name || 'Anonymous User'}</h4>
                                         <ShieldCheck size={18} className="text-blue-500" />
                                     </div>
                                     <div className="flex items-center gap-4 text-slate-400 font-bold text-sm mt-1">
                                         <div className="flex items-center gap-1">
                                             <Mail size={14} />
-                                            {user.email}
+                                            {user.email || 'No Email'}
                                         </div>
                                         <div className="flex items-center gap-1">
                                             <Calendar size={14} />
@@ -163,7 +168,7 @@ export default function MonitorPage() {
                                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Loyalty Activity</p>
                                     <div className="flex items-center gap-2 font-black text-slate-900 justify-end">
                                         <CreditCard size={16} className="text-emerald-500" />
-                                        {user._count.bookings} Bookings
+                                        {user._count?.bookings || 0} Bookings
                                     </div>
                                 </div>
                             </div>
