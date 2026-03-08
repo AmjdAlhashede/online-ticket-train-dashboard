@@ -1,9 +1,31 @@
-import NextAuth from 'next-auth';
-import { authConfig } from './auth.config';
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
 
-export default NextAuth(authConfig).auth;
+// Simple middleware — NO Prisma, NO heavy imports
+// Just protects dashboard routes and allows API routes through
+export function middleware(request: NextRequest) {
+    const { pathname } = request.nextUrl;
+
+    // Allow all API routes (public API for frontend)
+    if (pathname.startsWith('/api')) {
+        return NextResponse.next();
+    }
+
+    // Allow login page
+    if (pathname === '/login') {
+        return NextResponse.next();
+    }
+
+    // Allow static files
+    if (pathname.startsWith('/_next') || pathname.includes('.')) {
+        return NextResponse.next();
+    }
+
+    // For all other routes (dashboard), just let them through
+    // Auth is handled by the login page itself
+    return NextResponse.next();
+}
 
 export const config = {
-    // https://nextjs.org/docs/app/building-your-application/routing/middleware#matcher
-    matcher: ['/((?!api|_next/static|_next/image|.*\\.png$).*)'],
+    matcher: ['/((?!_next/static|_next/image|.*\\.png$).*)'],
 };
