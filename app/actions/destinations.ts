@@ -1,55 +1,53 @@
 'use server';
 
 import { revalidatePath } from "next/cache";
-
-const API_BASE_URL = '/api';
+import prisma from "@/lib/prisma";
 
 export async function getDestinations() {
     try {
-        const res = await fetch(`${API_BASE_URL}/destinations`, { cache: 'no-store' });
-        return await res.json();
+        const destinations = await prisma.destination.findMany({
+            orderBy: { city: 'asc' },
+            include: { _count: { select: { schedules: true } } }
+        });
+        return destinations;
     } catch (error) {
         console.error("Error fetching destinations:", error);
         return [];
     }
 }
 
-export async function createDestination(data: any) {
+export async function createDestination(data: { name: string; city: string; image: string; description: string }) {
     try {
-        const res = await fetch(`${API_BASE_URL}/destinations`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
-        });
-        const dest = await res.json();
+        const dest = await prisma.destination.create({ data });
         revalidatePath("/destinations");
         return { success: true, data: dest };
     } catch (error) {
-        return { success: false, error: "Failed" };
+        console.error("Error creating destination:", error);
+        return { success: false, error: "Failed to create destination" };
     }
 }
 
-export async function updateDestination(id: string, data: any) {
+export async function updateDestination(id: string, data: { name?: string; city?: string; image?: string; description?: string }) {
     try {
-        const res = await fetch(`${API_BASE_URL}/destinations/${id}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
+        const dest = await prisma.destination.update({
+            where: { id },
+            data
         });
-        const dest = await res.json();
         revalidatePath("/destinations");
         return { success: true, data: dest };
     } catch (error) {
-        return { success: false, error: "Failed" };
+        console.error("Error updating destination:", error);
+        return { success: false, error: "Failed to update destination" };
     }
 }
 
 export async function deleteDestination(id: string) {
     try {
-        await fetch(`${API_BASE_URL}/destinations/${id}`, { method: 'DELETE' });
+        await prisma.destination.delete({ where: { id } });
         revalidatePath("/destinations");
         return { success: true };
     } catch (error) {
-        return { success: false, error: "Failed" };
+        console.error("Error deleting destination:", error);
+        return { success: false, error: "Failed to delete destination. It may have linked schedules." };
     }
 }
