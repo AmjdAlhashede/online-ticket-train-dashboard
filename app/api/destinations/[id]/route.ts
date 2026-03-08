@@ -9,6 +9,20 @@ const corsHeaders = {
     "Access-Control-Allow-Headers": "Content-Type, Authorization",
 };
 
+export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
+    try {
+        const { id } = await params;
+        const dest = await prisma.destination.findUnique({
+            where: { id },
+            include: { _count: { select: { schedules: true } } }
+        });
+        if (!dest) return NextResponse.json({ error: 'Not found' }, { status: 404, headers: corsHeaders });
+        return NextResponse.json(dest, { headers: corsHeaders });
+    } catch (error) {
+        return NextResponse.json({ error: 'Failed' }, { status: 500, headers: corsHeaders });
+    }
+}
+
 export async function OPTIONS() {
     return NextResponse.json({}, { headers: corsHeaders });
 }
