@@ -5,11 +5,11 @@ export const dynamic = "force-dynamic";
 
 export async function GET() {
     try {
-        const destinations = await prisma.destination.findMany({
-            orderBy: { city: 'asc' },
+        const trains = await prisma.train.findMany({
+            orderBy: { number: 'asc' },
             include: { _count: { select: { schedules: true } } }
         });
-        return NextResponse.json(destinations);
+        return NextResponse.json(trains);
     } catch (error) {
         return NextResponse.json({ error: 'Failed' }, { status: 500 });
     }
@@ -18,8 +18,8 @@ export async function GET() {
 export async function POST(req: Request) {
     try {
         const body = await req.json();
-        const dest = await prisma.destination.create({ data: body });
-        return NextResponse.json(dest, { status: 201 });
+        const train = await prisma.train.create({ data: body });
+        return NextResponse.json(train, { status: 201 });
     } catch (error) {
         return NextResponse.json({ error: 'Failed' }, { status: 500 });
     }

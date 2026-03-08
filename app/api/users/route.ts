@@ -5,10 +5,12 @@ export const dynamic = "force-dynamic";
 
 export async function GET() {
     try {
-        const stations = await prisma.destination.findMany({
-            select: { id: true, name: true, city: true }
+        const users = await prisma.user.findMany({
+            where: { role: 'USER' },
+            include: { _count: { select: { bookings: true } } },
+            orderBy: { createdAt: 'desc' }
         });
-        return NextResponse.json(stations);
+        return NextResponse.json(users);
     } catch (error) {
         return NextResponse.json({ error: 'Failed' }, { status: 500 });
     }

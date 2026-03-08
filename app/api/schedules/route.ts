@@ -3,32 +3,31 @@ import prisma from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
-export async function GET(req: Request) {
-    const { searchParams } = new URL(req.url);
-    const from = searchParams.get("from");
-    const to = searchParams.get("to");
-
+export async function GET() {
     try {
-        const where: any = {};
-        if (from && from !== 'all') {
-            // In the real schema, we might need to match by city or station name
-            // For now, let's assume filtering by origin city name for simplicity if provided
-            where.origin = from;
-        }
-        if (to && to !== 'all') {
-            where.destinationId = to;
-        }
-
         const schedules = await prisma.schedule.findMany({
-            where,
-            include: {
-                train: true,
-                destination: true,
-            }
+            include: { train: true, destination: true, _count: { select: { bookings: true } } },
+            orderBy: { departureTime: 'asc' }
         });
         return NextResponse.json(schedules);
     } catch (error) {
-        console.error("Failed to fetch schedules:", error);
-        return NextResponse.json({ error: "Failed to fetch schedules" }, { status: 500 });
+        return NextResponse.json({ error: 'Failed' }, { status: 500 });
+    }
+}
+
+export async function POST(req: Request) {
+    try {
+        const body = await req.json();
+        const { departureTime, arrivalTime, ...rest } = body;
+        const schedule = await prisma.schedule.create({
+            data: {
+                ...rest,
+                departureTime: new Date(departureTime),
+                arrivalTime: new Date(arrivalTime)
+            }
+        });
+        return NextResponse.json(schedule, { status: 201 });
+    } catch (error) {
+        return NextResponse.json({ error: 'Failed' }, { status: 500 });
     }
 }

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import bcrypt from "bcryptjs";
 import prisma from "@/lib/prisma";
+import bcrypt from "bcryptjs";
 
 export const dynamic = "force-dynamic";
 
@@ -8,11 +8,8 @@ export async function POST(req: Request) {
     try {
         const { name, email, password } = await req.json();
 
-        if (!email || !password || !name) {
-            return NextResponse.json(
-                { message: "Name, email and password are required" },
-                { status: 400 }
-            );
+        if (!email || !password) {
+            return NextResponse.json({ message: "Email and password are required" }, { status: 400 });
         }
 
         const existingUser = await prisma.user.findUnique({
@@ -20,10 +17,7 @@ export async function POST(req: Request) {
         });
 
         if (existingUser) {
-            return NextResponse.json(
-                { message: "User already exists" },
-                { status: 400 }
-            );
+            return NextResponse.json({ message: "User already exists" }, { status: 400 });
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
@@ -33,19 +27,13 @@ export async function POST(req: Request) {
                 name,
                 email,
                 password: hashedPassword,
-                role: "USER" // Default role for main app registration
-            },
+                role: "ADMIN"
+            }
         });
 
-        return NextResponse.json(
-            { message: "User registered successfully", userId: user.id },
-            { status: 201 }
-        );
-    } catch (error: any) {
-        console.error("Registration error:", error);
-        return NextResponse.json(
-            { message: "An error occurred while registering the user" },
-            { status: 500 }
-        );
+        return NextResponse.json({ message: "User created successfully", user: { id: user.id, email: user.email } }, { status: 201 });
+    } catch (error) {
+        console.error('Registration error:', error);
+        return NextResponse.json({ message: "Internal server error" }, { status: 500 });
     }
 }

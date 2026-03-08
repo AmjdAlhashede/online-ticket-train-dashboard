@@ -1,68 +1,55 @@
 'use server';
 
-import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+
+const API_BASE_URL = '/api';
 
 export async function getTrains() {
     try {
-        return await prisma.train.findMany({
-            orderBy: { number: 'asc' },
-            include: {
-                _count: {
-                    select: { schedules: true }
-                }
-            }
-        });
+        const res = await fetch(`${API_BASE_URL}/trains`, { cache: 'no-store' });
+        return await res.json();
     } catch (error) {
         console.error("Error fetching trains:", error);
         return [];
     }
 }
 
-export async function createTrain(data: {
-    name: string;
-    number: string;
-    capacity: number;
-}) {
+export async function createTrain(data: any) {
     try {
-        const train = await prisma.train.create({
-            data
+        const res = await fetch(`${API_BASE_URL}/trains`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
         });
+        const train = await res.json();
         revalidatePath("/trains");
         return { success: true, data: train };
     } catch (error) {
-        console.error("Error creating train:", error);
-        return { success: false, error: "Failed to create train. Ensure the train number is unique." };
+        return { success: false, error: "Failed" };
     }
 }
 
-export async function updateTrain(id: string, data: {
-    name: string;
-    number: string;
-    capacity: number;
-}) {
+export async function updateTrain(id: string, data: any) {
     try {
-        const train = await prisma.train.update({
-            where: { id },
-            data
+        const res = await fetch(`${API_BASE_URL}/trains/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
         });
+        const train = await res.json();
         revalidatePath("/trains");
         return { success: true, data: train };
     } catch (error) {
-        console.error("Error updating train:", error);
-        return { success: false, error: "Failed to update train" };
+        return { success: false, error: "Failed" };
     }
 }
 
 export async function deleteTrain(id: string) {
     try {
-        await prisma.train.delete({
-            where: { id }
-        });
+        await fetch(`${API_BASE_URL}/trains/${id}`, { method: 'DELETE' });
         revalidatePath("/trains");
         return { success: true };
     } catch (error) {
-        console.error("Error deleting train:", error);
-        return { success: false, error: "Failed to delete train. It might be assigned to active schedules." };
+        return { success: false, error: "Failed" };
     }
 }

@@ -1,21 +1,11 @@
 'use server';
 
-import prisma from "@/lib/prisma";
+const API_BASE_URL = '/api';
 
 export async function getBookings() {
     try {
-        return await prisma.booking.findMany({
-            include: {
-                user: true,
-                schedule: {
-                    include: {
-                        train: true,
-                        destination: true
-                    }
-                }
-            },
-            orderBy: { createdAt: 'desc' }
-        });
+        const res = await fetch(`${API_BASE_URL}/bookings`, { cache: 'no-store' });
+        return await res.json();
     } catch (error) {
         console.error("Error fetching bookings:", error);
         return [];
@@ -24,15 +14,8 @@ export async function getBookings() {
 
 export async function getUsers() {
     try {
-        return await prisma.user.findMany({
-            where: { role: 'USER' },
-            include: {
-                _count: {
-                    select: { bookings: true }
-                }
-            },
-            orderBy: { createdAt: 'desc' }
-        });
+        const res = await fetch(`${API_BASE_URL}/users`, { cache: 'no-store' });
+        return await res.json();
     } catch (error) {
         console.error("Error fetching users:", error);
         return [];
