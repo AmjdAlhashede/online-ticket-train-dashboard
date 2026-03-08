@@ -39,7 +39,7 @@ export default function ScheduleModal({ isOpen, onClose, onSave, initialData, ti
         if (initialData) {
             setFormData({
                 trainId: initialData.trainId || '',
-                origin: initialData.origin || 'Riyadh Central',
+                origin: initialData.origin || '',
                 destinationId: initialData.destinationId || '',
                 departureTime: initialData.departureTime ? new Date(initialData.departureTime).toISOString().slice(0, 16) : '',
                 arrivalTime: initialData.arrivalTime ? new Date(initialData.arrivalTime).toISOString().slice(0, 16) : '',
@@ -48,7 +48,7 @@ export default function ScheduleModal({ isOpen, onClose, onSave, initialData, ti
         } else {
             setFormData({
                 trainId: '',
-                origin: 'Riyadh Central',
+                origin: '',
                 destinationId: '',
                 departureTime: '',
                 arrivalTime: '',
