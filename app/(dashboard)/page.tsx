@@ -6,13 +6,30 @@ import {
     TrendingUp,
     ArrowUpRight
 } from 'lucide-react';
+import prisma from '@/lib/prisma';
 
-export default function DashboardHome() {
+export default async function DashboardHome() {
+    // Fetch real stats from DB
+    const [bookingsCount, trainsCount, destinationsCount, usersCount, recentBookings] = await Promise.all([
+        prisma.booking.count(),
+        prisma.train.count(),
+        prisma.destination.count(),
+        prisma.user.count({ where: { role: 'USER' } }),
+        prisma.booking.findMany({
+            take: 3,
+            orderBy: { createdAt: 'desc' },
+            include: {
+                user: true,
+                schedule: { include: { destination: true } }
+            }
+        })
+    ]);
+
     const stats = [
-        { label: 'Total Revenue', value: '$12,450', icon: DollarSign, color: 'text-emerald-600', bg: 'bg-emerald-50', trend: '+12.5%' },
-        { label: 'Active Bookings', value: '156', icon: Users, color: 'text-blue-600', bg: 'bg-blue-50', trend: '+5.2%' },
-        { label: 'Available Trains', value: '12', icon: TrainFront, color: 'text-purple-600', bg: 'bg-purple-50', trend: 'Stable' },
-        { label: 'Active Destinations', value: '5', icon: MapPin, color: 'text-orange-600', bg: 'bg-orange-50', trend: 'Global' },
+        { label: 'Total Bookings', value: bookingsCount.toString(), icon: DollarSign, color: 'text-emerald-600', bg: 'bg-emerald-50', trend: 'Live' },
+        { label: 'Active Customers', value: usersCount.toString(), icon: Users, color: 'text-blue-600', bg: 'bg-blue-50', trend: 'Live' },
+        { label: 'Available Trains', value: trainsCount.toString(), icon: TrainFront, color: 'text-purple-600', bg: 'bg-purple-50', trend: 'Stable' },
+        { label: 'Active Destinations', value: destinationsCount.toString(), icon: MapPin, color: 'text-orange-600', bg: 'bg-orange-50', trend: 'Global' },
     ];
 
     return (
@@ -49,18 +66,22 @@ export default function DashboardHome() {
                         </button>
                     </div>
                     <div className="space-y-6">
-                        {[1, 2, 3].map((_, i) => (
-                            <div key={i} className="flex items-center gap-4">
+                        {recentBookings.length > 0 ? recentBookings.map((booking, i) => (
+                            <div key={booking.id} className="flex items-center gap-4">
                                 <div className="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center text-slate-600 font-bold">
-                                    {String.fromCharCode(65 + i)}
+                                    {booking.user.name?.charAt(0) || 'U'}
                                 </div>
                                 <div className="flex-1">
-                                    <p className="text-sm font-bold text-slate-900">New Booking: Riyadh to Jeddah</p>
-                                    <p className="text-xs text-slate-500 font-medium">Passenger: Ahmed M. • Seat A12</p>
+                                    <p className="text-sm font-bold text-slate-900">Booking: {booking.schedule.origin} → {booking.schedule.destination.city}</p>
+                                    <p className="text-xs text-slate-500 font-medium">Passenger: {booking.user.name} • Seat {booking.seatNumber || 'N/A'}</p>
                                 </div>
-                                <span className="text-xs font-bold text-slate-400">12m ago</span>
+                                <span className="text-xs font-bold text-slate-400">
+                                    {new Date(booking.createdAt).toLocaleDateString()}
+                                </span>
                             </div>
-                        ))}
+                        )) : (
+                            <p className="text-sm text-slate-400 text-center py-4">No bookings yet</p>
+                        )}
                     </div>
                 </div>
 
@@ -69,7 +90,7 @@ export default function DashboardHome() {
                         <TrendingUp size={48} className="text-blue-200 mb-6" />
                         <h3 className="text-2xl font-black mb-2">Network Expansion</h3>
                         <p className="text-blue-100 font-medium leading-relaxed opacity-90 max-w-sm">
-                            Your train network has seen a 25% increase in efficiency this month. Consider adding more cars to the Makkah - Madinah route.
+                            Your train network currently has {trainsCount} trains serving {destinationsCount} destinations with {bookingsCount} total bookings.
                         </p>
                         <button className="mt-8 px-6 py-3 bg-white text-blue-600 font-bold rounded-xl hover:bg-blue-50 transition-all shadow-lg">
                             Analyze Routes
