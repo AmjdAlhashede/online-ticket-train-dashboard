@@ -79,12 +79,12 @@ export default function DestinationModal({ isOpen, onClose, onSave, initialData,
                     </div>
 
                     <div>
-                        <label className="block text-sm font-bold text-slate-700 mb-1">Image URL</label>
+                        <label className="block text-sm font-bold text-slate-700 mb-1">Image (URL or Link)</label>
                         <input
-                            type="url"
+                            type="text"
                             required
                             className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                            placeholder="https://images.unsplash.com/..."
+                            placeholder="e.g. https://images... or /path.jpg"
                             value={formData.image}
                             onChange={(e) => setFormData({ ...formData, image: e.target.value })}
                         />

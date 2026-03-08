@@ -56,15 +56,6 @@ export default function Sidebar() {
                 })}
             </nav>
 
-            <div className="p-4 mt-auto">
-                <button
-                    onClick={() => signOut({ callbackUrl: '/login' })}
-                    className="w-full flex items-center gap-3 px-4 py-4 rounded-xl text-red-400 hover:bg-red-500/10 transition-all font-bold"
-                >
-                    <LogOut size={20} />
-                    Exit Dashboard
-                </button>
-            </div>
         </div>
     );
 }
