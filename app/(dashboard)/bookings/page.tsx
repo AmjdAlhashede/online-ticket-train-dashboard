@@ -12,9 +12,10 @@ import {
     ShieldCheck,
     ArrowRight,
     TrendingUp,
-    CreditCard
+    CreditCard,
+    Trash2
 } from 'lucide-react';
-import { getBookings, getUsers } from '@/app/actions/bookings';
+import { getBookings, getUsers, deleteUser } from '@/app/actions/bookings';
 
 export default function MonitorPage() {
     const [activeTab, setActiveTab] = useState<'bookings' | 'users'>('bookings');
@@ -55,6 +56,17 @@ export default function MonitorPage() {
     });
 
     const formatDate = (date: any) => date ? new Date(date).toLocaleDateString() : 'N/A';
+
+    const handleDeleteUser = async (userId: string, userName: string) => {
+        if (!window.confirm(`Are you sure you want to delete ${userName}? All their bookings will also be deleted.`)) return;
+
+        const res = await deleteUser(userId);
+        if (res.success) {
+            fetchData();
+        } else {
+            alert("Error deleting user");
+        }
+    };
 
     return (
         <div className="space-y-8">
@@ -171,6 +183,14 @@ export default function MonitorPage() {
                                         {user._count?.bookings || 0} Bookings
                                     </div>
                                 </div>
+
+                                <button
+                                    onClick={() => handleDeleteUser(user.id, user.name || user.email)}
+                                    className="p-3 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"
+                                    title="Delete Customer"
+                                >
+                                    <Trash2 size={20} />
+                                </button>
                             </div>
                         ))
                     )}
