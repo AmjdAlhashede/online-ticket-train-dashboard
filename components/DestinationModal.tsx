@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { X } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { X, Upload, Link as LinkIcon, Image as ImageIcon, Trash2 } from 'lucide-react';
 
 interface DestinationModalProps {
     isOpen: boolean;
@@ -12,6 +12,7 @@ interface DestinationModalProps {
 }
 
 export default function DestinationModal({ isOpen, onClose, onSave, initialData, title }: DestinationModalProps) {
+    const fileInputRef = useRef<HTMLInputElement>(null);
     const [formData, setFormData] = useState({
         name: '',
         city: '',
@@ -48,6 +49,21 @@ export default function DestinationModal({ isOpen, onClose, onSave, initialData,
         await onSave(submissionData);
         setLoading(false);
         onClose();
+    };
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            if (file.size > 2 * 1024 * 1024) { // 2MB Limit for Base64 (to avoid DB bloat)
+                alert("File is too large. Please select an image under 2MB.");
+                return;
+            }
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setFormData({ ...formData, image: reader.result as string });
+            };
+            reader.readAsDataURL(file);
+        }
     };
 
     return (
@@ -87,20 +103,43 @@ export default function DestinationModal({ isOpen, onClose, onSave, initialData,
                         </div>
                     </div>
 
-                    <div>
-                        <label className="block text-sm font-bold text-slate-700 mb-1">Image URL (Optional)</label>
-                        <input
-                            type="text"
-                            className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                            placeholder="Link to image (Unsplash, etc.)"
-                            value={formData.image}
-                            onChange={(e) => setFormData({ ...formData, image: e.target.value })}
-                        />
-                        <p className="text-[11px] text-slate-500 mt-1">Leave blank to use a default premium train image.</p>
+                    <div className="space-y-3">
+                        <label className="block text-sm font-bold text-slate-700 mb-1">Station Image</label>
+
+                        <div className="flex gap-2">
+                            <button
+                                type="button"
+                                onClick={() => fileInputRef.current?.click()}
+                                className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl border-2 border-dashed border-slate-200 hover:border-blue-400 hover:bg-blue-50 transition-all text-slate-600 font-medium"
+                            >
+                                <Upload size={18} />
+                                Upload File
+                            </button>
+                            <input
+                                type="file"
+                                ref={fileInputRef}
+                                hidden
+                                accept="image/*"
+                                onChange={handleFileChange}
+                            />
+                        </div>
+
+                        <div className="relative">
+                            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+                                <LinkIcon size={16} />
+                            </div>
+                            <input
+                                type="text"
+                                className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all text-sm"
+                                placeholder="Or paste image URL here..."
+                                value={formData.image.startsWith('data:') ? '' : formData.image}
+                                onChange={(e) => setFormData({ ...formData, image: e.target.value })}
+                            />
+                        </div>
                     </div>
 
                     {formData.image && (
-                        <div className="w-full h-32 rounded-xl border-2 border-dashed border-slate-100 overflow-hidden bg-slate-50 relative group">
+                        <div className="w-full h-40 rounded-2xl border border-slate-100 overflow-hidden bg-slate-50 relative group">
                             <img
                                 src={formData.image}
                                 alt="Preview"
@@ -109,8 +148,17 @@ export default function DestinationModal({ isOpen, onClose, onSave, initialData,
                                     (e.target as HTMLImageElement).style.display = 'none';
                                 }}
                             />
-                            <div className="absolute inset-0 flex items-center justify-center text-[10px] text-slate-400 pointer-events-none">
-                                Image Preview
+                            <div className="absolute top-2 right-2 flex gap-2">
+                                <button
+                                    type="button"
+                                    onClick={() => setFormData({ ...formData, image: '' })}
+                                    className="p-1.5 bg-white/90 backdrop-blur rounded-lg shadow-sm text-red-500 hover:bg-red-50 transition-all"
+                                >
+                                    <Trash2 size={16} />
+                                </button>
+                            </div>
+                            <div className="absolute inset-0 flex items-center justify-center -z-10 text-[10px] text-slate-400">
+                                <ImageIcon size={24} className="opacity-20" />
                             </div>
                         </div>
                     )}
